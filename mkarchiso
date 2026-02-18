@@ -451,9 +451,38 @@ _make_bootmodes() {
 }
 
 # Copy kernel and initramfs to ISO 9660
+_ensure_boot_artifacts() {
+    local kernel_path
+
+    if [[ "${arch}" != 'aarch64' ]]; then
+        return
+    fi
+
+    if [[ ! -r "${pacstrap_dir}/boot/vmlinuz-linux-eos-arm" ]]; then
+        kernel_path="$(find "${pacstrap_dir}/usr/lib/modules" -maxdepth 2 -type f \
+            \( -name 'vmlinuz-linux-eos-arm' -o -name 'vmlinuz' -o -name 'Image' -o -name 'Image.gz' \) \
+            -print -quit 2>/dev/null || true)"
+        if [[ -z "${kernel_path}" ]]; then
+            kernel_path="$(find "${pacstrap_dir}/boot" -maxdepth 1 -type f -name 'vmlinuz-*' -print -quit 2>/dev/null || true)"
+        fi
+        [[ -n "${kernel_path}" ]] || _msg_error "Could not locate a readable aarch64 kernel image in '${pacstrap_dir}'." 1
+        install -m 0644 -- "${kernel_path}" "${pacstrap_dir}/boot/vmlinuz-linux-eos-arm"
+    fi
+
+    if [[ ! -r "${pacstrap_dir}/boot/initramfs-linux-eos-arm.img" ]]; then
+        _msg_info "Generating fallback initramfs for aarch64..."
+        eval -- env -u TMPDIR arch-chroot "${pacstrap_dir}" /bin/bash -eu -c \
+            "mkinitcpio -c /etc/mkinitcpio.conf.d/archiso.conf -k /boot/vmlinuz-linux-eos-arm -g /boot/initramfs-linux-eos-arm.img"
+    fi
+
+    [[ -r "${pacstrap_dir}/boot/initramfs-linux-eos-arm.img" ]] \
+        || _msg_error "Fallback initramfs generation failed in '${pacstrap_dir}'." 1
+}
+
 _make_boot_on_iso9660() {
     local ucode_image
     _msg_info "Preparing kernel and initramfs for the ISO 9660 file system..."
+    _run_once _ensure_boot_artifacts
     install -d -m 0755 -- "${isofs_dir}/${install_dir}/boot/${arch}"
     install -m 0644 -- "${pacstrap_dir}/boot/initramfs-"*".img" "${isofs_dir}/${install_dir}/boot/${arch}/"
     install -m 0644 -- "${pacstrap_dir}/boot/vmlinuz-"* "${isofs_dir}/${install_dir}/boot/${arch}/"
@@ -527,6 +556,7 @@ _make_bootmode_bios.syslinux.mbr() {
 _make_boot_on_fat() {
     local ucode_image all_ucode_images=()
     _msg_info "Preparing kernel and initramfs for the FAT file system..."
+    _run_once _ensure_boot_artifacts
     mmd -i "${efibootimg}" \
         "::/${install_dir}" "::/${install_dir}/boot" "::/${install_dir}/boot/${arch}"
     mcopy -i "${efibootimg}" "${pacstrap_dir}/boot/vmlinuz-"* \
