@@ -1,6 +1,7 @@
 # EndeavourOS-ISO-arm64
 
-[![Build](https://github.com/startergo/EndeavourOS-ISO-arm64/actions/workflows/build.yml/badge.svg)](https://github.com/startergo/EndeavourOS-ISO-arm64/actions/workflows/build.yml)
+[![Build](https://github.com/startergo/EndeavourOS-ISO-arm64/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/startergo/EndeavourOS-ISO-arm64/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/startergo/EndeavourOS-ISO-arm64?label=latest%20release)](https://github.com/startergo/EndeavourOS-ISO-arm64/releases/latest)
 
 EndeavourOS live ISO for **aarch64** — designed to run in **UTM on Apple Silicon** (QEMU/HVF).
 
