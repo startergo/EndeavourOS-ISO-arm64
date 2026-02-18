@@ -45,7 +45,7 @@ jobs:
       - name: Install archiso from source
         run: |
           git clone --depth 1 https://gitlab.archlinux.org/archlinux/archiso.git /tmp/archiso
-          make -C /tmp/archiso install
+          make -C /tmp/archiso install-base
 
       - name: Run prepare.sh
         run: bash prepare.sh
