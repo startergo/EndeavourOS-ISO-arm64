@@ -2,7 +2,18 @@
 
 PRESETS=('archiso')
 
-ALL_kver='/boot/vmlinuz-linux-eos-arm'
+for _kernel_image in \
+	'/boot/vmlinuz-linux-eos-arm' \
+	'/usr/lib/modules/'*'/vmlinuz' \
+	'/usr/lib/modules/'*'/Image' \
+	'/usr/lib/modules/'*'/Image.gz'; do
+	if [[ -r "${_kernel_image}" ]]; then
+		ALL_kver="${_kernel_image}"
+		break
+	fi
+done
+unset _kernel_image
+: "${ALL_kver:=/boot/vmlinuz-linux-eos-arm}"
 archiso_config='/etc/mkinitcpio.conf.d/archiso.conf'
 
 archiso_image="/boot/initramfs-linux-eos-arm.img"
