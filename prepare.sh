@@ -30,6 +30,13 @@ get_pkg() {
 
 get_pkg "eos-settings-plasma"
 
-# Build liveuser skel
-cd "airootfs/root/endeavouros-skel-liveuser"
-makepkg -f
+# Build liveuser skel (makepkg refuses to run as root; drop to a build user)
+SKEL_DIR="$(pwd)/airootfs/root/endeavouros-skel-liveuser"
+if [ "$(id -u)" = "0" ]; then
+  useradd -M -s /bin/bash builduser 2>/dev/null || true
+  chown -R builduser "$SKEL_DIR"
+  su -c "cd '$SKEL_DIR' && makepkg -f" builduser
+else
+  cd "$SKEL_DIR"
+  makepkg -f
+fi

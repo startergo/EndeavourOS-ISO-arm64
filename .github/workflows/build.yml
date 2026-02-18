@@ -37,6 +37,7 @@ jobs:
           pacman -Syu --noconfirm
           pacman -S --noconfirm --needed \
             imagemagick \
+            ttf-dejavu \
             curl \
             wget \
             git \
@@ -46,6 +47,24 @@ jobs:
         run: |
           git clone --depth 1 https://gitlab.archlinux.org/archlinux/archiso.git /tmp/archiso
           make -C /tmp/archiso install-scripts install-profiles install-doc
+
+      - name: Set up EndeavourOS ARM repo
+        run: |
+          # Create EOS mirrorlist
+          mkdir -p /etc/pacman.d
+          printf 'Server = https://mirror.alpix.eu/endeavouros/repo/$repo/$arch\n' \
+            > /etc/pacman.d/endeavouros-mirrorlist
+
+          # Bootstrap EOS keyring (SigLevel=Never for initial download)
+          sed 's/SigLevel = PackageRequired/SigLevel = Never/' pacman.conf \
+            > /tmp/bootstrap-pacman.conf
+          pacman --config /tmp/bootstrap-pacman.conf -Sy --noconfirm
+          pacman --config /tmp/bootstrap-pacman.conf -S --noconfirm endeavouros-keyring
+          pacman-key --populate endeavouros
+
+          # Install our pacman.conf as the system config and resync
+          cp pacman.conf /etc/pacman.conf
+          pacman -Sy --noconfirm
 
       - name: Run prepare.sh
         run: bash prepare.sh
