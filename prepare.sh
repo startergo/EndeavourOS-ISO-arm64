@@ -11,9 +11,9 @@ magick airootfs/root/livewall.png \
   -annotate +10+10 "$(date '+%Y-%m-%d')" \
   airootfs/root/livewall.png
 
-  # generating actual ranked mirrorlist to fetch packages for offline install in run_before_squashfs later
+  # Copy the repo's ALARM mirrorlist (reflector does not support ALARM mirrors)
 mkdir -p "airootfs/etc/pacman.d/"
-reflector --country "$(curl -s https://ipapi.co/country_name/)" --protocol https --sort rate --latest 10 --save airootfs/etc/pacman.d/mirrorlist
+cp mirrorlist airootfs/etc/pacman.d/mirrorlist
 
 
 # Get wallpaper for installed system
