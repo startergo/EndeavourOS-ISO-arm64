@@ -38,6 +38,9 @@ jobs:
           pacman -S --noconfirm --needed \
             imagemagick \
             ttf-dejavu \
+            squashfs-tools \
+            dosfstools \
+            mtools \
             curl \
             wget \
             git \
