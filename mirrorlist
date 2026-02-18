@@ -6,7 +6,7 @@
 ### the primary mirror is used directly.
 
 ## Primary (global CDN)
-Server = https://mirror.archlinuxarm.org/$arch/$repo
+Server = http://mirror.archlinuxarm.org/$arch/$repo
 
 ## Tier 1 mirrors
 Server = http://de.mirror.archlinuxarm.org/$arch/$repo
