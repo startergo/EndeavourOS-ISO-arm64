@@ -264,17 +264,17 @@ endeavouros-branding
 eos-apps-info
 eos-hooks
 eos-log-tool
-eos-packagelist
+# eos-packagelist removed — not yet in EOS ARM repo
 eos-quickstart
 eos-rankmirrors
 rate-mirrors
-reflector-simple
+# reflector-simple removed — depends on reflector which is unavailable on ALARM
 welcome
 yay
 # nvidia-inst removed (x86 NVIDIA tool — not applicable on aarch64 QEMU)
 
 ## Calamares EndeavourOS
-calamares
+# calamares removed — not yet in EOS ARM repo; re-add when available
 ckbcomp
 os-prober
 
