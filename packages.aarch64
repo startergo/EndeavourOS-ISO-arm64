@@ -11,12 +11,12 @@ cryptsetup
 device-mapper
 diffutils
 dracut
-edk2-shell
+# edk2-shell removed — x86 UEFI firmware shell; UTM/QEMU provides UEFI for aarch64
 inetutils
 less
-linux
+linux-eos-arm
 linux-firmware
-linux-headers
+linux-eos-arm-headers
 logrotate
 lsb-release
 man-db
@@ -99,7 +99,7 @@ bash-completion
 dmidecode
 dialog
 dmraid
-downgrade
+# downgrade removed — AUR only, not in ALARM repos
 duf
 fakeroot
 freetype2
@@ -111,7 +111,7 @@ gpm
 gptfdisk
 haveged
 hwdetect
-hwinfo
+# hwinfo removed — not available in ALARM repos
 inxi
 libgsf
 libopenraw
@@ -122,7 +122,7 @@ pkgfile
 poppler-glib
 power-profiles-daemon
 rebuild-detector
-reflector
+# reflector removed — only supports standard Arch mirrors, not ALARM; use rate-mirrors
 rsync
 tldr
 unrar
