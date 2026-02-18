@@ -1,0 +1,14 @@
+########################################
+### Arch Linux ARM (ALARM) mirrorlist ###
+########################################
+### Used for aarch64 ISO builds.
+### reflector does not support ALARM mirrors;
+### the primary mirror is used directly.
+
+## Primary (global CDN)
+Server = https://mirror.archlinuxarm.org/$arch/$repo
+
+## Tier 1 mirrors
+Server = http://de.mirror.archlinuxarm.org/$arch/$repo
+Server = http://us.mirror.archlinuxarm.org/$arch/$repo
+Server = http://nl.mirror.archlinuxarm.org/$arch/$repo

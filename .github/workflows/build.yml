@@ -1,0 +1,58 @@
+name: Build EndeavourOS aarch64 ISO
+
+on:
+  push:
+    branches: [ main ]
+    tags:     [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    # Native aarch64 runner with Arch Linux ARM container for pacman/archiso
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: menci/archlinuxarm:base-devel
+      options: --privileged
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm --needed \
+            archiso \
+            imagemagick \
+            reflector \
+            curl \
+            wget
+
+      - name: Run prepare.sh
+        run: bash prepare.sh
+
+      - name: Build ISO
+        run: bash mkarchiso -v "."
+
+      - name: Verify ISO
+        run: |
+          echo "--- ISO output ---"
+          ls -lh out/*.iso
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: endeavouros-aarch64-iso
+          path: out/*.iso
+          retention-days: 14
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*.iso
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
