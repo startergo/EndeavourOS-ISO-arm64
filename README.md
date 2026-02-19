@@ -8,12 +8,11 @@ EndeavourOS live ISO for **aarch64** — designed to run in **UTM on Apple Silic
 ## Distribution
 
 Since the EndeavourOS Live ISO now uses KDE Plasma, the image is too large for GitHub Release asset limits.
-This repository publishes split `.iso.zst.part-*` release assets when needed.
-Download all parts from the matching release and reassemble locally:
+This repository publishes release assets as compressed files (and split parts when needed), plus a generated `helper.sh`.
+Run the helper from your target release tag:
 
 ```bash
-cat EndeavourOS_Ganymede-YYYY.MM.DD.iso.zst.part-* > EndeavourOS_Ganymede-YYYY.MM.DD.iso.zst
-zstd -d EndeavourOS_Ganymede-YYYY.MM.DD.iso.zst -o EndeavourOS_Ganymede-YYYY.MM.DD.iso
+curl -fsSL https://github.com/startergo/EndeavourOS-ISO-arm64/releases/download/<release-tag>/helper.sh | bash
 ```
 
 Modelled after [EndeavourOS-ISO-t2](https://github.com/t2linux/EndeavourOS-ISO-t2):

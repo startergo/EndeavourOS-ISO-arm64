@@ -109,14 +109,6 @@ jobs:
           if [ "$ASSET_SIZE" -ge "$MAX_SIZE" ]; then
             SPLIT_PREFIX="out/release-assets/$(basename "$ASSET_FILE").part-"
             split -b "$CHUNK_SIZE" -d -a 3 "$ASSET_FILE" "$SPLIT_PREFIX"
-
-            {
-              echo "This release asset is split due to GitHub's 2 GiB per-file upload limit."
-              echo
-              echo "Reassemble and extract:"
-              echo "1) cat $(basename "$ASSET_FILE").part-* > $(basename "$ASSET_FILE")"
-              echo "2) zstd -d $(basename "$ASSET_FILE") -o $(basename "$ISO_FILE")"
-            } > out/release-assets/REASSEMBLE.txt
           else
             cp -f "$ASSET_FILE" out/release-assets/
           fi
@@ -138,6 +130,38 @@ jobs:
             TAG="${{ github.ref_name }}"
           fi
           echo "name=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Generate helper script
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+        env:
+          REPO: ${{ github.repository }}
+          TAG: ${{ steps.tag.outputs.name }}
+        run: |
+          cd out/release-assets
+          {
+            echo '#!/usr/bin/env bash'
+            echo 'set -euo pipefail'
+            echo
+          } > helper.sh
+
+          if compgen -G '*.part-*' > /dev/null; then
+            mapfile -t PARTS < <(ls -1 *.part-* | sort)
+            for part in "${PARTS[@]}"; do
+              echo "wget -q --show-progress https://github.com/${REPO}/releases/download/${TAG}/${part}" >> helper.sh
+            done
+            ZST_NAME="${PARTS[0]%.part-*}"
+            ISO_NAME="${ZST_NAME%.zst}"
+            echo "cat ${ZST_NAME}.part-* > ${ZST_NAME}" >> helper.sh
+            echo "zstd -d ${ZST_NAME} -o ${ISO_NAME}" >> helper.sh
+            echo "rm -f ${ZST_NAME}.part-*" >> helper.sh
+          else
+            ZST_NAME="$(ls -1 *.zst | head -n1)"
+            ISO_NAME="${ZST_NAME%.zst}"
+            echo "wget -q --show-progress https://github.com/${REPO}/releases/download/${TAG}/${ZST_NAME}" >> helper.sh
+            echo "zstd -d ${ZST_NAME} -o ${ISO_NAME}" >> helper.sh
+          fi
+
+          chmod +x helper.sh
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
