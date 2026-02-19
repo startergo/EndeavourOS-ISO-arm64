@@ -1798,7 +1798,7 @@ _build_iso_base() {
     [[ -e "${work_dir}/build_date" ]] || printf '%s\n' "$SOURCE_DATE_EPOCH" >"${work_dir}/build_date"
 
     [[ "${quiet}" == "y" ]] || _show_config
-    _run_once _make_pacman_conf
+    _make_pacman_conf
     [[ -z "${gpg_key}" ]] || _run_once _export_gpg_publickey
     _run_once _make_custom_airootfs
     _run_once _make_packages
@@ -1844,7 +1844,7 @@ _build_buildmode_bootstrap() {
     esac
 
     [[ "${quiet}" == "y" ]] || _show_config
-    _run_once _make_pacman_conf
+    _make_pacman_conf
     _run_once _make_packages
     _run_once _make_version
     _run_once _make_pkglist

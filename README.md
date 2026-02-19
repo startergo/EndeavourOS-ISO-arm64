@@ -35,7 +35,21 @@ Must build on **aarch64** (native ARM64). Options:
 - Locally in a UTM VM on Apple Silicon running EndeavourOS/Arch ARM
 
 ```bash
-sudo pacman -S archiso imagemagick reflector
+sudo pacman -S --needed arch-install-scripts squashfs-tools mtools dosfstools imagemagick wget
+```
+
+`mkarchiso` is shipped in this repository, so the `archiso` package is not required on hosts where it is unavailable.
+`reflector` is also not required for this profile (the repository mirrorlist is copied by `prepare.sh`).
+
+If your host is not already configured with EndeavourOS ARM repositories and keys, bootstrap them once:
+
+```bash
+sudo cp pacman.conf /tmp/bootstrap-pacman.conf
+sudo sed -i 's/SigLevel = PackageRequired/SigLevel = Never/' /tmp/bootstrap-pacman.conf
+sudo pacman --config /tmp/bootstrap-pacman.conf -Sy --noconfirm
+sudo pacman --config /tmp/bootstrap-pacman.conf -S --noconfirm endeavouros-keyring endeavouros-mirrorlist
+sudo pacman-key --populate endeavouros
+sudo rm -f /tmp/bootstrap-pacman.conf
 ```
 
 ### Build
@@ -45,6 +59,7 @@ git clone https://github.com/startergo/EndeavourOS-ISO-arm64
 cd EndeavourOS-ISO-arm64
 
 bash prepare.sh         # download wallpapers, rank mirrors, build skel
+bash reset.sh           # clean cached work/out when retrying after config changes
 sudo bash mkarchiso -v "."   # build ISO → out/
 ```
 
