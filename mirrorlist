@@ -10,5 +10,3 @@ Server = http://mirror.archlinuxarm.org/$arch/$repo
 
 ## Tier 1 mirrors
 Server = http://de.mirror.archlinuxarm.org/$arch/$repo
-Server = http://us.mirror.archlinuxarm.org/$arch/$repo
-Server = http://nl.mirror.archlinuxarm.org/$arch/$repo

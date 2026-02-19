@@ -5,11 +5,20 @@ PRESETS=('archiso')
 ALL_kver='/boot/vmlinuz-linux-eos-arm'
 
 if [[ ! -r "${ALL_kver}" ]]; then
-	_detected_kver="$(find /usr/lib/modules -maxdepth 2 -type f \
-		\( -name 'vmlinuz-linux-eos-arm' -o -name 'vmlinuz' -o -name 'Image' -o -name 'Image.gz' \) \
+	_detected_kver="$(find /usr/lib/modules /boot -maxdepth 4 \( -type f -o -type l \) \
+		\( -name 'vmlinuz-linux-eos-arm' -o -name 'vmlinuz-linux' -o -name 'vmlinuz' -o -name 'vmlinuz-*' -o -name 'Image' -o -name 'Image.gz' -o -name 'Image-*' \) \
 		-print -quit 2>/dev/null || true)"
 	if [[ -n "${_detected_kver}" ]]; then
-		ALL_kver="${_detected_kver}"
+		if [[ -L "${_detected_kver}" ]]; then
+			_resolved_kver="$(readlink -f -- "${_detected_kver}" 2>/dev/null || true)"
+			if [[ -n "${_resolved_kver}" && -r "${_resolved_kver}" ]]; then
+				_detected_kver="${_resolved_kver}"
+			fi
+			unset _resolved_kver
+		fi
+		if [[ -r "${_detected_kver}" ]]; then
+			ALL_kver="${_detected_kver}"
+		fi
 	fi
 	unset _detected_kver
 fi

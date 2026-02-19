@@ -452,20 +452,24 @@ _make_bootmodes() {
 
 # Copy kernel and initramfs to ISO 9660
 _ensure_boot_artifacts() {
-    local kernel_path
+    local kernel_path resolved_kernel_path
 
     if [[ "${arch}" != 'aarch64' ]]; then
         return
     fi
 
     if [[ ! -r "${pacstrap_dir}/boot/vmlinuz-linux-eos-arm" ]]; then
-        kernel_path="$(find "${pacstrap_dir}/usr/lib/modules" -maxdepth 2 -type f \
-            \( -name 'vmlinuz-linux-eos-arm' -o -name 'vmlinuz' -o -name 'Image' -o -name 'Image.gz' \) \
+        kernel_path="$(find "${pacstrap_dir}/usr/lib/modules" "${pacstrap_dir}/boot" -maxdepth 6 \( -type f -o -type l \) \
+            \( -name 'vmlinuz-linux-eos-arm' -o -name 'vmlinuz-linux' -o -name 'vmlinuz' -o -name 'vmlinuz-*' -o -name 'Image' -o -name 'Image.gz' -o -name 'Image-*' \) \
             -print -quit 2>/dev/null || true)"
-        if [[ -z "${kernel_path}" ]]; then
-            kernel_path="$(find "${pacstrap_dir}/boot" -maxdepth 1 -type f -name 'vmlinuz-*' -print -quit 2>/dev/null || true)"
+        if [[ -n "${kernel_path}" && -L "${kernel_path}" ]]; then
+            resolved_kernel_path="$(readlink -f -- "${kernel_path}" 2>/dev/null || true)"
+            if [[ -n "${resolved_kernel_path}" && -r "${resolved_kernel_path}" ]]; then
+                kernel_path="${resolved_kernel_path}"
+            fi
         fi
-        [[ -n "${kernel_path}" ]] || _msg_error "Could not locate a readable aarch64 kernel image in '${pacstrap_dir}'." 1
+        [[ -n "${kernel_path}" && -r "${kernel_path}" ]] || _msg_error "Could not locate a readable aarch64 kernel image in '${pacstrap_dir}'." 1
+        install -d -m 0755 -- "${pacstrap_dir}/boot"
         install -m 0644 -- "${kernel_path}" "${pacstrap_dir}/boot/vmlinuz-linux-eos-arm"
     fi
 
