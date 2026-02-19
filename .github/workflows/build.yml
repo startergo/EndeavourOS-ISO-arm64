@@ -18,6 +18,9 @@ on:
         default: false
         type: boolean
 
+permissions:
+  contents: write
+
 jobs:
   build:
     # Native aarch64 runner with Arch Linux ARM container for pacman/archiso
