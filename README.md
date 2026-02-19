@@ -5,7 +5,18 @@
 
 EndeavourOS live ISO for **aarch64** — designed to run in **UTM on Apple Silicon** (QEMU/HVF).
 
-Modelled after [EndeavourOS-ISO-t2](https://github.com/endeavouros-team/EndeavourOS-ISO-t2):
+## Distribution
+
+Since the EndeavourOS Live ISO now uses KDE Plasma, the image is too large for GitHub Release asset limits.
+This repository publishes split `.iso.zst.part-*` release assets when needed.
+Download all parts from the matching release and reassemble locally:
+
+```bash
+cat EndeavourOS_Ganymede-YYYY.MM.DD.iso.zst.part-* > EndeavourOS_Ganymede-YYYY.MM.DD.iso.zst
+zstd -d EndeavourOS_Ganymede-YYYY.MM.DD.iso.zst -o EndeavourOS_Ganymede-YYYY.MM.DD.iso
+```
+
+Modelled after [EndeavourOS-ISO-t2](https://github.com/t2linux/EndeavourOS-ISO-t2):
 same mkarchiso toolchain, same KDE Plasma 6 desktop, same Calamares installer — adapted for
 ARM64 architecture and QEMU virtual machines.
 

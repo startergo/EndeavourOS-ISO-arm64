@@ -98,15 +98,30 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         run: |
           ISO_FILE="$(ls -1 out/*.iso | head -n1)"
-          MAX_SIZE=2147483648
-          ISO_SIZE="$(stat -c%s "$ISO_FILE")"
-          if [ "$ISO_SIZE" -ge "$MAX_SIZE" ]; then
-            ASSET_FILE="${ISO_FILE}.zst"
-            zstd -19 -T0 --force "$ISO_FILE" -o "$ASSET_FILE"
+          MAX_SIZE=2147483647
+          CHUNK_SIZE=1900m
+          mkdir -p out/release-assets
+
+          ASSET_FILE="${ISO_FILE}.zst"
+          zstd -19 -T0 --force "$ISO_FILE" -o "$ASSET_FILE"
+
+          ASSET_SIZE="$(stat -c%s "$ASSET_FILE")"
+          if [ "$ASSET_SIZE" -ge "$MAX_SIZE" ]; then
+            SPLIT_PREFIX="out/release-assets/$(basename "$ASSET_FILE").part-"
+            split -b "$CHUNK_SIZE" -d -a 3 "$ASSET_FILE" "$SPLIT_PREFIX"
+
+            cat > out/release-assets/REASSEMBLE.txt <<EOF
+This release asset is split due to GitHub's 2 GiB per-file upload limit.
+
+Reassemble and extract:
+1) cat $(basename "$ASSET_FILE").part-* > $(basename "$ASSET_FILE")
+2) zstd -d $(basename "$ASSET_FILE") -o $(basename "$ISO_FILE")
+EOF
           else
-            ASSET_FILE="$ISO_FILE"
+            cp -f "$ASSET_FILE" out/release-assets/
           fi
-          echo "file=$ASSET_FILE" >> "$GITHUB_OUTPUT"
+          sha256sum out/release-assets/* > out/release-assets/SHA256SUMS.txt
+          echo "glob=out/release-assets/*" >> "$GITHUB_OUTPUT"
 
       - name: Determine release tag
         id: tag
@@ -129,7 +144,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.name }}
-          files: ${{ steps.release_asset.outputs.file }}
+          files: ${{ steps.release_asset.outputs.glob }}
           generate_release_notes: true
           prerelease: ${{ inputs.prerelease || false }}
         env:
