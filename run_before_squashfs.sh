@@ -27,8 +27,14 @@ echo "##############################"
 cd "/root"
 
 echo "---> Init & Populate keys --->"
-pacman-key --init
-pacman-key --populate archlinuxarm endeavouros
+pacman-key --init || true
+keyrings=()
+[[ -f /usr/share/pacman/keyrings/archlinuxarm.gpg ]] && keyrings+=(archlinuxarm)
+[[ -f /usr/share/pacman/keyrings/archlinux.gpg ]] && keyrings+=(archlinux)
+[[ -f /usr/share/pacman/keyrings/endeavouros.gpg ]] && keyrings+=(endeavouros)
+if (( ${#keyrings[@]} > 0 )); then
+    pacman-key --populate "${keyrings[@]}" || true
+fi
 pacman -Syy
 
 echo "---> backup bash configs from skel to replace after liveuser creation --->"
@@ -36,7 +42,9 @@ mkdir -p "/root/filebackups/"
 cp -af "/etc/skel/"{".bashrc",".bash_profile"} "/root/filebackups/"
 
 echo "---> Install liveuser skel (in case of conflicts use overwrite) --->"
-pacman -U --noconfirm --overwrite "/etc/skel/.bash_profile","/etc/skel/.bashrc" -- "/root/endeavouros-skel-liveuser/"*".pkg.tar.zst"
+if compgen -G "/root/endeavouros-skel-liveuser/*.pkg.tar.zst" > /dev/null; then
+    pacman -U --noconfirm --overwrite "/etc/skel/.bash_profile","/etc/skel/.bashrc" -- "/root/endeavouros-skel-liveuser/"*.pkg.tar.zst
+fi
 echo "---> start validate skel files --->"
 ls /etc/skel/.*
 ls /etc/skel/
@@ -56,7 +64,9 @@ cp "/root/liveuser.png" "/var/lib/AccountsService/icons/liveuser"
 rm "/root/liveuser.png"
 
 echo "---> Remove liveuser skel to clean for target skel --"
-pacman -Rns --noconfirm -- "endeavouros-skel-liveuser"
+if pacman -Q endeavouros-skel-liveuser >/dev/null 2>&1; then
+    pacman -Rns --noconfirm -- "endeavouros-skel-liveuser"
+fi
 rm -rf "/root/endeavouros-skel-liveuser"
 
 echo "---> setup theming for root user --->"
@@ -68,12 +78,19 @@ cat "/usr/lib/endeavouros-release" >> "/etc/motd"
 echo "------------------" >> "/etc/motd"
 
 echo "---> Install locally builded packages on ISO (place packages under airootfs/root/packages) --->"
+mkdir -p "/root/packages"
 echo "--> content of /root/packages:"
-ls "/root/packages/"
+ls "/root/packages/" || true
 echo "end of content of /root/packages. <---"
 pacman -Sy
 if compgen -G "/root/packages/*.pkg.tar.zst" > /dev/null; then
-    pacman -U --noconfirm --needed -- "/root/packages/"*.pkg.tar.zst || true
+    cp /etc/pacman.conf /tmp/pacman-local.conf
+    sed -i 's/^LocalFileSigLevel.*/LocalFileSigLevel = Never/' /tmp/pacman-local.conf
+    if ! grep -q '^LocalFileSigLevel' /tmp/pacman-local.conf; then
+        printf '\nLocalFileSigLevel = Never\n' >> /tmp/pacman-local.conf
+    fi
+    pacman -U --config /tmp/pacman-local.conf --noconfirm --needed -- "/root/packages/"*.pkg.tar.zst || true
+    rm -f /tmp/pacman-local.conf
 fi
 rm -rf "/root/packages/"
 
@@ -90,7 +107,9 @@ fi
 if [[ -f "/root/livewall.png" ]]; then
     mv "/root/livewall.png" "/usr/share/endeavouros/backgrounds/endeavouros-wallpaper.png"
 fi
-chmod 644 "/usr/share/endeavouros/backgrounds/"*".png"
+if compgen -G "/usr/share/endeavouros/backgrounds/*.png" > /dev/null; then
+    chmod 644 "/usr/share/endeavouros/backgrounds/"*.png
+fi
 
 echo "---> install bash configs back into /etc/skel for offline install target --->"
 cp -af "/root/filebackups/"{".bashrc",".bash_profile"} "/etc/skel/"
@@ -98,16 +117,18 @@ cp -af "/root/filebackups/"{".bashrc",".bash_profile"} "/etc/skel/"
 echo "---> get needed packages for offline installs --->"
 mkdir -p "/usr/share/packages"
 pacman -Syy
-offline_pkgs=(grub os-prober)
-for pkg in eos-dracut kernel-install-for-dracut; do
+offline_pkgs=()
+for pkg in grub os-prober eos-dracut kernel-install-for-dracut; do
     if pacman -Si "$pkg" >/dev/null 2>&1; then
         offline_pkgs+=("$pkg")
     fi
 done
-pacman -Sw --noconfirm --cachedir "/usr/share/packages" "${offline_pkgs[@]}"
+if (( ${#offline_pkgs[@]} > 0 )); then
+    pacman -Sw --noconfirm --cachedir "/usr/share/packages" "${offline_pkgs[@]}"
+fi
 
 echo "---> Clean pacman log and package cache --->"
-rm "/var/log/pacman.log"
+rm -f "/var/log/pacman.log"
 # pacman -Scc seem to fail so:
 rm -rf "/var/cache/pacman/pkg/"
 
