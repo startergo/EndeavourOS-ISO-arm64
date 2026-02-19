@@ -41,6 +41,7 @@ jobs:
             squashfs-tools \
             dosfstools \
             mtools \
+            xorriso \
             arch-install-scripts \
             curl \
             wget \

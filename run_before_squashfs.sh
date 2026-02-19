@@ -72,7 +72,9 @@ echo "--> content of /root/packages:"
 ls "/root/packages/"
 echo "end of content of /root/packages. <---"
 pacman -Sy
-pacman -U --noconfirm --needed -- "/root/packages/"*".pkg.tar.zst"
+if compgen -G "/root/packages/*.pkg.tar.zst" > /dev/null; then
+    pacman -U --noconfirm --needed -- "/root/packages/"*.pkg.tar.zst || true
+fi
 rm -rf "/root/packages/"
 
 echo "---> Enable systemd services in case needed --->"
@@ -81,8 +83,13 @@ echo " --> per default now in airootfs/etc/systemd/system/multi-user.target.want
 systemctl set-default multi-user.target
 
 echo "---> Set wallpaper for live-session and original for installed system --->"
-mv "/root/endeavouros-wallpaper.png" "/etc/calamares/files/endeavouros-wallpaper.png"
-mv "/root/livewall.png" "/usr/share/endeavouros/backgrounds/endeavouros-wallpaper.png"
+mkdir -p "/etc/calamares/files"
+if [[ -f "/root/endeavouros-wallpaper.png" ]]; then
+    mv "/root/endeavouros-wallpaper.png" "/etc/calamares/files/endeavouros-wallpaper.png"
+fi
+if [[ -f "/root/livewall.png" ]]; then
+    mv "/root/livewall.png" "/usr/share/endeavouros/backgrounds/endeavouros-wallpaper.png"
+fi
 chmod 644 "/usr/share/endeavouros/backgrounds/"*".png"
 
 echo "---> install bash configs back into /etc/skel for offline install target --->"
@@ -91,7 +98,13 @@ cp -af "/root/filebackups/"{".bashrc",".bash_profile"} "/etc/skel/"
 echo "---> get needed packages for offline installs --->"
 mkdir -p "/usr/share/packages"
 pacman -Syy
-pacman -Sw --noconfirm --cachedir "/usr/share/packages" grub eos-dracut kernel-install-for-dracut os-prober
+offline_pkgs=(grub os-prober)
+for pkg in eos-dracut kernel-install-for-dracut; do
+    if pacman -Si "$pkg" >/dev/null 2>&1; then
+        offline_pkgs+=("$pkg")
+    fi
+done
+pacman -Sw --noconfirm --cachedir "/usr/share/packages" "${offline_pkgs[@]}"
 
 echo "---> Clean pacman log and package cache --->"
 rm "/var/log/pacman.log"
@@ -100,7 +113,7 @@ rm -rf "/var/cache/pacman/pkg/"
 
 echo "---> Get ALARM mirrorlist for offline installs --->"
 cat > "/etc/pacman.d/mirrorlist" << 'MIRROREOF'
-Server = https://mirror.archlinuxarm.org/\$arch/\$repo
+Server = http://mirror.archlinuxarm.org/\$arch/\$repo
 MIRROREOF
 
 echo "---> create package versions file --->"

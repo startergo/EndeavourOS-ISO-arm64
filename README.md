@@ -35,7 +35,7 @@ Must build on **aarch64** (native ARM64). Options:
 - Locally in a UTM VM on Apple Silicon running EndeavourOS/Arch ARM
 
 ```bash
-sudo pacman -S --needed arch-install-scripts squashfs-tools mtools dosfstools imagemagick wget
+sudo pacman -S --needed arch-install-scripts squashfs-tools mtools dosfstools xorriso imagemagick wget
 ```
 
 `mkarchiso` is shipped in this repository, so the `archiso` package is not required on hosts where it is unavailable.
