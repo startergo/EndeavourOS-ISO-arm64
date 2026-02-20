@@ -29,7 +29,7 @@ ARM64 architecture and QEMU virtual machines.
 | Packages | Arch Linux + EOS repos | Arch Linux ARM + EOS ARM repos |
 | Boot modes | BIOS (syslinux) + UEFI | UEFI only |
 | CPU microcode | intel-ucode, amd-ucode | — (not applicable) |
-| GPU drivers | xf86-video-amdgpu/ati, nvidia | — (QEMU uses virtio-gpu) |
+| GPU drivers | xf86-video-amdgpu/ati, nvidia | xf86-video-fbdev fallback (QEMU virtio-gpu) |
 | Hardware detection | NVIDIA, Intel GPU, Broadcom WiFi | — (clean VM, virtio-net) |
 | WiFi | broadcom-wl (physical NIC) | virtio-net (QEMU) |
 | VM tools | qemu-guest-agent, spice-vdagent | qemu-guest-agent, spice-vdagent |

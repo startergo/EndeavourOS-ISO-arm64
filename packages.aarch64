@@ -61,6 +61,7 @@ mesa
 mesa-utils
 xf86-input-libinput
 xorg-server
+xf86-video-fbdev
 xorg-xdpyinfo
 xorg-xinit
 xorg-xinput
@@ -174,7 +175,6 @@ python-capng
 arch-install-scripts
 # memtest86+ and memtest86+-efi are x86-only — removed
 mkinitcpio-archiso
-mkinitcpio-nfs-utils
 pv
 # syslinux removed — BIOS boot is x86-only; aarch64 uses UEFI only
 
