@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=SPICE VDAgent
+Comment=SPICE agent for clipboard and dynamic resolution integration
+Exec=spice-vdagent
+Terminal=false
+OnlyShowIn=KDE;
+X-GNOME-Autostart-enabled=true
+NoDisplay=true
