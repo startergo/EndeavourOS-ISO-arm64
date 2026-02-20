@@ -99,7 +99,12 @@ rm -rf "/root/packages/"
 echo "---> Enable systemd services in case needed --->"
 echo " --> per default now in airootfs/etc/systemd/system/multi-user.target.wants"
 #systemctl enable NetworkManager.service systemd-timesyncd.service bluetooth.service firewalld.service
-systemctl set-default multi-user.target
+if pacman -Q sddm >/dev/null 2>&1; then
+    systemctl enable sddm.service
+    systemctl set-default graphical.target
+else
+    systemctl set-default multi-user.target
+fi
 
 echo "---> Set wallpaper for live-session and original for installed system --->"
 mkdir -p "/etc/calamares/files"
