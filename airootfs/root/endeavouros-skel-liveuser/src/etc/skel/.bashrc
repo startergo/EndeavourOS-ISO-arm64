@@ -85,3 +85,13 @@ _open_files_for_editing() {
 # alias pacdiff=eos-pacdiff
 ################################################################################
 
+if [ "$(whoami)" = "liveuser" ] && [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ] && [ "$(tty 2>/dev/null)" = "/dev/tty1" ] && [ -z "$SSH_TTY" ] && [ -z "${EOS_GUI_STARTED:-}" ]; then
+    export EOS_GUI_STARTED=1
+    if command -v startx >/dev/null 2>&1; then
+        startx && exit 0
+    fi
+    if command -v startplasma-wayland >/dev/null 2>&1; then
+        exec dbus-run-session startplasma-wayland
+    fi
+fi
+
