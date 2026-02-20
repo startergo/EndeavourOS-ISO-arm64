@@ -5,8 +5,8 @@
 ### reflector does not support ALARM mirrors;
 ### the primary mirror is used directly.
 
-## Primary (global CDN)
-Server = http://de.mirror.archlinuxarm.org/$arch/$repo
-
-## Tier 1 mirrors
+## Primary
 Server = http://mirror.archlinuxarm.org/$arch/$repo
+
+## Fallback
+Server = http://de.mirror.archlinuxarm.org/$arch/$repo

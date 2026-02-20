@@ -60,6 +60,8 @@ usermod -s /usr/bin/bash root
 
 echo "---> Create liveuser --->"
 useradd -m -p "" -g 'liveuser' -G 'sys,rfkill,wheel,uucp,nopasswdlogin,adm,tty' -s /bin/bash liveuser
+cp -af /etc/skel/. /home/liveuser/
+chown -R liveuser:liveuser /home/liveuser
 cp "/root/liveuser.png" "/var/lib/AccountsService/icons/liveuser"
 rm "/root/liveuser.png"
 
