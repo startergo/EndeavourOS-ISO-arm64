@@ -38,6 +38,7 @@ jobs:
           pacman-key --init
           pacman-key --populate archlinuxarm
           pacman -Syu --noconfirm
+          gpgconf --kill gpg-agent || true
           pacman -S --noconfirm --needed \
             imagemagick \
             ttf-dejavu \
