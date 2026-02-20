@@ -153,12 +153,14 @@ jobs:
             ISO_NAME="${ZST_NAME%.zst}"
             echo "cat ${ZST_NAME}.part-* > ${ZST_NAME}" >> helper.sh
             echo "zstd -d ${ZST_NAME} -o ${ISO_NAME}" >> helper.sh
+            echo "rm -f ${ZST_NAME}" >> helper.sh
             echo "rm -f ${ZST_NAME}.part-*" >> helper.sh
           else
             ZST_NAME="$(ls -1 *.zst | head -n1)"
             ISO_NAME="${ZST_NAME%.zst}"
             echo "wget -q --show-progress https://github.com/${REPO}/releases/download/${TAG}/${ZST_NAME}" >> helper.sh
             echo "zstd -d ${ZST_NAME} -o ${ISO_NAME}" >> helper.sh
+            echo "rm -f ${ZST_NAME}" >> helper.sh
           fi
 
           chmod +x helper.sh
