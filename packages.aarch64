@@ -5,6 +5,7 @@ iptables-nft
 base
 base-devel
 archlinux-keyring
+archlinuxarm-keyring
 endeavouros-mirrorlist
 endeavouros-keyring
 cryptsetup
