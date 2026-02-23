@@ -21,21 +21,6 @@ ARM64 architecture and QEMU virtual machines.
 
 ---
 
-## What's different from the x86_64 ISO
-
-| | x86_64 (EndeavourOS-ISO-t2) | aarch64 (this repo) |
-|---|---|---|
-| Architecture | x86_64 | aarch64 |
-| Packages | Arch Linux + EOS repos | Arch Linux ARM + EOS ARM repos |
-| Boot modes | BIOS (syslinux) + UEFI | UEFI only |
-| CPU microcode | intel-ucode, amd-ucode | — (not applicable) |
-| GPU drivers | xf86-video-amdgpu/ati, nvidia | xf86-video-fbdev fallback (QEMU virtio-gpu) |
-| Hardware detection | NVIDIA, Intel GPU, Broadcom WiFi | — (clean VM, virtio-net) |
-| WiFi | broadcom-wl (physical NIC) | virtio-net (QEMU) |
-| VM tools | qemu-guest-agent, spice-vdagent | qemu-guest-agent, spice-vdagent |
-
----
-
 ## Quick start
 
 ### Build requirements
@@ -78,6 +63,51 @@ sudo bash mkarchiso -v "."   # build ISO → out/
 1. Open **UTM** → New VM → **Virtualize** → **Linux**
 2. Select the `out/EndeavourOS_Ganymede-YYYY.MM.DD.iso`
 3. Allocate RAM (4 GB+ recommended for live KDE session)
+
+---
+
+## Docker build (cross-platform)
+
+Build the ISO on any platform with Docker installed (macOS, Linux, x86_64, aarch64).
+
+### Build using the helper script
+
+```bash
+git clone https://github.com/startergo/EndeavourOS-ISO-arm64
+cd EndeavourOS-ISO-arm64
+
+./docker-build.sh build    # Build Docker image (one-time)
+./docker-build.sh all      # Full build (prepare + iso)
+```
+
+### Available commands
+
+| Command | Description |
+|---------|-------------|
+| `./docker-build.sh build` | Build Docker image |
+| `./docker-build.sh prepare` | Run prepare.sh only |
+| `./docker-build.sh iso` | Build ISO only |
+| `./docker-build.sh all` | Full build (prepare + iso) |
+| `./docker-build.sh shell` | Interactive shell |
+| `./docker-build.sh clean` | Clean build cache |
+| `./docker-build.sh compose` | Use docker-compose |
+
+### Manual Docker usage
+
+```bash
+# Build image
+docker build -t endeavouros-aarch64-builder .
+
+# Full build
+docker run --rm -it --privileged \
+  -v "$(pwd):/workspace" \
+  -v "$(pwd)/work:/workspace/work" \
+  -v "$(pwd)/out:/workspace/out" \
+  endeavouros-aarch64-builder \
+  bash -c "bash prepare.sh && bash mkarchiso -v ."
+```
+
+---
 4. Boot — UTM provides UEFI firmware automatically for aarch64
 
 ---

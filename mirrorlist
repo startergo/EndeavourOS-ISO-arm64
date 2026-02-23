@@ -5,8 +5,10 @@
 ### reflector does not support ALARM mirrors;
 ### the primary mirror is used directly.
 
-## Primary
-Server = http://mirror.archlinuxarm.org/$arch/$repo
+## Reliable mirrors first (serve .zst packages)
+Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxarm/$arch/$repo
 
-## Fallback
+## Primary ALARM mirrors (fallback)
 Server = http://de.mirror.archlinuxarm.org/$arch/$repo
+Server = http://mirror.archlinuxarm.org/$arch/$repo
+Server = https://mirror.leitecastro.com/alarm/$arch/$repo

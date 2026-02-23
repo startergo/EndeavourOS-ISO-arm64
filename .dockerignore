@@ -1,0 +1,18 @@
+# Build artifacts
+work/
+out/
+*.iso
+
+# Git
+.git/
+.github/
+
+# Documentation
+*.md
+LICENSE
+
+# Docker files
+Dockerfile
+docker-compose.yml
+docker-build.sh
+.dockerignore

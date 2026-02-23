@@ -7,13 +7,14 @@
 # aarch64/UTM adaptation: removed x86 hardware detection, ALARM mirrorlist
 
 script_path=$(readlink -f "${0%/*}")
-work_dir="work"
+# Use MKARCHISO_WORK_DIR if set (e.g. passed by docker-build.sh), else fall back to script-relative work/
+work_dir="${MKARCHISO_WORK_DIR:-${script_path}/work}"
 
 # Adapted from AIS. An excellent bit of code!
 # all pathes must be in quotation marks "path/to/file/or/folder" for now.
 
 arch_chroot() {
-    arch-chroot "${script_path}/${work_dir}/aarch64/airootfs" /bin/bash -c "${1}"
+    arch-chroot "${work_dir}/aarch64/airootfs" /bin/bash -c "${1}"
 }
 
 do_merge() {
@@ -108,6 +109,7 @@ fi
 
 echo "---> Set wallpaper for live-session and original for installed system --->"
 mkdir -p "/etc/calamares/files"
+mkdir -p "/usr/share/endeavouros/backgrounds"
 if [[ -f "/root/endeavouros-wallpaper.png" ]]; then
     mv "/root/endeavouros-wallpaper.png" "/etc/calamares/files/endeavouros-wallpaper.png"
 fi
