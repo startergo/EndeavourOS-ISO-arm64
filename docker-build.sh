@@ -122,26 +122,20 @@ case "${1:-build}" in
     "$0" push-dockerhub "$TAG"
     ;;
 
-  compose)
-    echo "Using docker-compose..."
-    docker-compose run --rm iso-builder bash -c "bash prepare.sh && bash mkarchiso -v ."
-    ;;
-
   *)
-    echo "Usage: $0 {build|build-cache|prepare|iso|all|push|push-ghcr|push-dockerhub|shell|clean|compose}"
+    echo "Usage: $0 {build|build-cache|prepare|iso|all|push|push-ghcr|push-dockerhub|shell|clean}"
     echo ""
     echo "Commands:"
-    echo "  build           - Build Docker image (no cache)"
-    echo "  build-cache     - Build Docker image (with cache, faster)"
-    echo "  prepare         - Run prepare.sh (download wallpapers, build skel)"
-    echo "  iso             - Build ISO only"
-    echo "  all             - Full build (prepare + iso)"
-    echo "  push [tag]      - Push builder image + ISO to both ghcr.io and Docker Hub"
-    echo "  push-ghcr [tag] - Push builder image + ISO to ghcr.io only"
+    echo "  build                - Build Docker image (no cache)"
+    echo "  build-cache          - Build Docker image (with cache, faster)"
+    echo "  prepare              - Run prepare.sh (download wallpapers, build skel)"
+    echo "  iso                  - Build ISO only"
+    echo "  all                  - Full build (prepare + iso)"
+    echo "  push [tag]           - Push builder image + ISO to both ghcr.io and Docker Hub"
+    echo "  push-ghcr [tag]      - Push builder image + ISO to ghcr.io only"
     echo "  push-dockerhub [tag] - Push builder image to Docker Hub only"
-    echo "  shell       - Start interactive shell in container"
-    echo "  clean       - Clean build cache (run reset.sh)"
-    echo "  compose     - Use docker-compose for full build"
+    echo "  shell                - Start interactive shell in container"
+    echo "  clean                - Clean build cache (run reset.sh)"
     exit 1
     ;;
 esac

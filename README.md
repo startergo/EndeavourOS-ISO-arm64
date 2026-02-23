@@ -84,28 +84,46 @@ cd EndeavourOS-ISO-arm64
 
 | Command | Description |
 |---------|-------------|
-| `./docker-build.sh build` | Build Docker image |
+| `./docker-build.sh build` | Build Docker image (no cache) |
+| `./docker-build.sh build-cache` | Build Docker image (with cache) |
 | `./docker-build.sh prepare` | Run prepare.sh only |
 | `./docker-build.sh iso` | Build ISO only |
 | `./docker-build.sh all` | Full build (prepare + iso) |
-| `./docker-build.sh shell` | Interactive shell |
-| `./docker-build.sh clean` | Clean build cache |
-| `./docker-build.sh compose` | Use docker-compose |
+| `./docker-build.sh push [tag]` | Push builder image + ISO to both registries |
+| `./docker-build.sh push-ghcr [tag]` | Push builder image + ISO to ghcr.io only |
+| `./docker-build.sh push-dockerhub [tag]` | Push builder image to Docker Hub only |
+| `./docker-build.sh shell` | Interactive shell in container |
+| `./docker-build.sh clean` | Clean build artifacts |
 
-### Manual Docker usage
+### Pre-built Docker image
+
+Pull the builder image directly instead of building it:
 
 ```bash
-# Build image
-docker build -t endeavouros-aarch64-builder .
+# From Docker Hub
+docker pull startergo/endeavouros-aarch64-builder:latest
 
-# Full build
+# From GitHub Container Registry
+docker pull ghcr.io/startergo/endeavouros-aarch64-builder:latest
+```
+
+Then run a full build using the pulled image:
+
+```bash
+mkdir -p out
 docker run --rm -it --privileged \
   -v "$(pwd):/workspace" \
-  -v "$(pwd)/work:/workspace/work" \
-  -v "$(pwd)/out:/workspace/out" \
-  endeavouros-aarch64-builder \
-  bash -c "bash prepare.sh && bash mkarchiso -v ."
+  -v "$(pwd)/out:/out" \
+  -w /workspace \
+  startergo/endeavouros-aarch64-builder \
+  bash -c "mkdir -p /build/work /build/out && bash prepare.sh && \
+           MKARCHISO_WORK_DIR=/build/work bash mkarchiso -v -w /build/work -o /build/out . && \
+           cp /build/out/*.iso /out/"
 ```
+
+> **Note:** The build work directory is kept inside the container at `/build/work` (Linux
+> case-sensitive filesystem) rather than bind-mounted from macOS, which avoids
+> case-collision issues with `xorg-server` package files.
 
 ---
 4. Boot — UTM provides UEFI firmware automatically for aarch64
@@ -123,7 +141,11 @@ EndeavourOS-ISO-arm64/
 ├── mkarchiso                   # Build script (from upstream archiso, EOS fork)
 ├── prepare.sh                  # Pre-build: wallpaper, mirrorlist, skel
 ├── run_before_squashfs.sh      # Chroot: users, services, offline packages
-├── reset.sh                    # Clean build artefacts
+├── reset.sh                    # Clean build artifacts
+├── Dockerfile                  # Docker builder image (Arch Linux ARM)
+├── docker-build.sh             # Build/push helper script
+├── docker-entrypoint.sh        # Container entrypoint
+├── .dockerignore               # Docker build context exclusions
 │
 ├── airootfs/                   # Live filesystem overlay
 │   ├── etc/systemd/system/     # Services (no NVIDIA/Intel/Broadcom)
