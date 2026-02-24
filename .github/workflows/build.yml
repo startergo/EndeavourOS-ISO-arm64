@@ -211,13 +211,10 @@ jobs:
 
       - name: Install oras
         run: |
-          ORAS_VERSION=$(curl -fsSL https://api.github.com/repos/oras-project/oras/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+          ORAS_VERSION="v1.2.2"
           curl -fsSL "https://github.com/oras-project/oras/releases/download/${ORAS_VERSION}/oras_${ORAS_VERSION#v}_linux_arm64.tar.gz" | \
             tar -xz -C /usr/local/bin oras
-
-      - name: Log in to GHCR via oras
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | oras login ghcr.io --username ${{ github.actor }} --password-stdin
+          oras version
 
       - name: Determine tag
         id: tag
@@ -231,16 +228,22 @@ jobs:
           fi
 
       - name: Push ISO as OCI artifact to ghcr.io
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ISO_FILE="$(ls -1 out/*.iso | head -n1)"
           ISO_NAME="$(basename "$ISO_FILE")"
           TAG="${{ steps.tag.outputs.name }}"
           REPO="ghcr.io/${{ github.repository_owner }}/endeavouros-iso-arm64"
           echo "Pushing ${ISO_NAME} to ${REPO}:${TAG}"
-          oras push "${REPO}:${TAG}" \
-            --artifact-type application/vnd.endeavouros.iso \
+          oras push \
+            --username "${{ github.actor }}" \
+            --password "${GH_TOKEN}" \
+            "${REPO}:${TAG}" \
             "${ISO_FILE}:application/octet-stream"
-          oras push "${REPO}:latest" \
-            --artifact-type application/vnd.endeavouros.iso \
+          oras push \
+            --username "${{ github.actor }}" \
+            --password "${GH_TOKEN}" \
+            "${REPO}:latest" \
             "${ISO_FILE}:application/octet-stream"
           echo "Pull with: oras pull ${REPO}:${TAG}"
