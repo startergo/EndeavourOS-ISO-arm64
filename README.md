@@ -15,6 +15,15 @@ Run the helper from your target release tag:
 curl -fsSL https://github.com/startergo/EndeavourOS-ISO-arm64/releases/download/<release-tag>/helper.sh | bash
 ```
 
+The raw ISO is also pushed to GHCR on every release build:
+
+```bash
+oras pull ghcr.io/startergo/endeavouros-iso-arm64:<release-tag>
+```
+
+The live session ships the **Calamares installer** (built for aarch64 in CI) —
+install from the Welcome app → **Install System**, no manual scripts needed.
+
 Modelled after [EndeavourOS-ISO-t2](https://github.com/t2linux/EndeavourOS-ISO-t2):
 same mkarchiso toolchain, same KDE Plasma 6 desktop, same Calamares installer — adapted for
 ARM64 architecture and QEMU virtual machines.

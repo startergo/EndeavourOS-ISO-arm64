@@ -171,15 +171,41 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         env:
           REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
           TAG: ${{ steps.tag.outputs.name }}
         run: |
           {
-            echo "Since EndeavourOS Live ISO now uses KDE, it's too big to fit into GitHub release, so we are using other means of distribution."
+            echo "## EndeavourOS ARM64 — ${TAG}"
             echo
-            echo "Just run:"
-            echo "\`curl -fsSL https://github.com/${REPO}/releases/download/${TAG}/helper.sh | bash\`"
+            echo "Live ISO for **aarch64** — built for **UTM / QEMU on Apple Silicon**, with the full"
+            echo "KDE Plasma desktop, EndeavourOS theming, and the **Calamares installer built for aarch64**."
             echo
-            echo "in your terminal."
+            echo "### Download"
+            echo
+            echo "The ISO is too large for a single GitHub release asset, so it is shipped as a"
+            echo "zstd-compressed file (split into parts when needed). Run:"
+            echo
+            echo '```bash'
+            echo "curl -fsSL https://github.com/${REPO}/releases/download/${TAG}/helper.sh | bash"
+            echo '```'
+            echo
+            echo "Or pull the raw ISO from GHCR:"
+            echo
+            echo '```bash'
+            echo "oras pull ghcr.io/${OWNER}/endeavouros-iso-arm64:${TAG}"
+            echo '```'
+            echo
+            echo "Checksums are in \`SHA256SUMS.txt\`."
+            echo
+            echo "### Quick start (UTM)"
+            echo
+            echo "1. New VM → **Virtualize** → **Linux** → select the \`EndeavourOS_Ganymede-*.iso\`"
+            echo "2. Give it 4 GB+ RAM — it boots straight into the live desktop (no login screen)"
+            echo "3. Install from the live session: **Welcome → Install System** (Calamares)"
+            echo "   - Bootloader: systemd-boot (default) or grub"
+            echo "   - Offline install — everything needed is on the ISO"
+            echo
+            echo "> The manual \`install-eos.sh\` script from the 2026.02 releases is no longer needed."
           } > out/release-assets/RELEASE_NOTES.md
 
       - name: Create GitHub Release
