@@ -31,7 +31,10 @@ wget -qN --show-progress -P "airootfs/root/" "https://raw.githubusercontent.com/
 chmod +x "./"{"mkarchiso","run_before_squashfs.sh"}
 
 get_pkg() {
-    sudo pacman -Syw "$1" --noconfirm --cachedir "airootfs/root/packages" \
+    # --nodeps: download only the named package, not its whole dep tree.
+    # The tree used to be installed wholesale in the chroot, which caused
+    # stale-version conflicts (deps resolve from the repos there instead).
+    sudo pacman -Syw --nodeps "$1" --noconfirm --cachedir "airootfs/root/packages" \
     && sudo chown $USER:$USER "airootfs/root/packages/"*".pkg.tar"*
 }
 

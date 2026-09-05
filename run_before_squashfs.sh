@@ -33,8 +33,11 @@ keyrings=()
 [[ -f /usr/share/pacman/keyrings/archlinuxarm.gpg ]] && keyrings+=(archlinuxarm)
 [[ -f /usr/share/pacman/keyrings/archlinux.gpg ]] && keyrings+=(archlinux)
 [[ -f /usr/share/pacman/keyrings/endeavouros.gpg ]] && keyrings+=(endeavouros)
-if (( ${#keyrings[@]} > 0 )); then
-    pacman-key --populate "${keyrings[@]}" || true
+# NOTE: '\$' escapes are required — the unquoted heredoc expands bare '\$'
+# in the outer shell, which silently turned this guard into (( 0 > 0 )) and
+# skipped populate entirely (repo dep pulls then failed with "unknown trust").
+if (( \${#keyrings[@]} > 0 )); then
+    pacman-key --populate "\${keyrings[@]}" || true
 fi
 pacman -Syy
 
@@ -87,25 +90,36 @@ ls "/root/packages/" || true
 echo "end of content of /root/packages. <---"
 pacman -Sy
 # NOTE: this heredoc is unquoted, so every '$' below is expanded by the OUTER
-# shell before the chroot runs it. Keep these blocks free of '$' (the reason
-# the old code used compgen + bare globs instead of arrays). ALARM downloads
-# .pkg.tar.xz, locally built packages are .pkg.tar.zst — handle both.
-if compgen -G "/root/packages/*.pkg.tar.zst" > /dev/null; then
+# shell before the chroot runs it — keep these blocks free of '$' (hence the
+# compgen guards + bare globs instead of arrays).
+# Install only the top-level local packages and let pacman resolve their deps
+# from the freshly synced repos. Installing the whole downloaded dep tree
+# instead caused stale-version conflicts (e.g. jack2 vs installed pipewire-jack).
+if compgen -G "/root/packages/calamares-*.pkg.tar.zst" > /dev/null; then
     cp /etc/pacman.conf /tmp/pacman-local.conf
     sed -i 's/^LocalFileSigLevel.*/LocalFileSigLevel = Never/' /tmp/pacman-local.conf
     if ! grep -q '^LocalFileSigLevel' /tmp/pacman-local.conf; then
         printf '\nLocalFileSigLevel = Never\n' >> /tmp/pacman-local.conf
     fi
-    pacman -U --config /tmp/pacman-local.conf --noconfirm --needed -- /root/packages/*.pkg.tar.zst || true
+    pacman -U --config /tmp/pacman-local.conf --noconfirm --needed -- /root/packages/calamares-*.pkg.tar.zst || true
     rm -f /tmp/pacman-local.conf
 fi
-if compgen -G "/root/packages/*.pkg.tar.xz" > /dev/null; then
+if compgen -G "/root/packages/eos-settings-plasma-*.pkg.tar.zst" > /dev/null; then
     cp /etc/pacman.conf /tmp/pacman-local.conf
     sed -i 's/^LocalFileSigLevel.*/LocalFileSigLevel = Never/' /tmp/pacman-local.conf
     if ! grep -q '^LocalFileSigLevel' /tmp/pacman-local.conf; then
         printf '\nLocalFileSigLevel = Never\n' >> /tmp/pacman-local.conf
     fi
-    pacman -U --config /tmp/pacman-local.conf --noconfirm --needed -- /root/packages/*.pkg.tar.xz || true
+    pacman -U --config /tmp/pacman-local.conf --noconfirm --needed -- /root/packages/eos-settings-plasma-*.pkg.tar.zst || true
+    rm -f /tmp/pacman-local.conf
+fi
+if compgen -G "/root/packages/eos-settings-plasma-*.pkg.tar.xz" > /dev/null; then
+    cp /etc/pacman.conf /tmp/pacman-local.conf
+    sed -i 's/^LocalFileSigLevel.*/LocalFileSigLevel = Never/' /tmp/pacman-local.conf
+    if ! grep -q '^LocalFileSigLevel' /tmp/pacman-local.conf; then
+        printf '\nLocalFileSigLevel = Never\n' >> /tmp/pacman-local.conf
+    fi
+    pacman -U --config /tmp/pacman-local.conf --noconfirm --needed -- /root/packages/eos-settings-plasma-*.pkg.tar.xz || true
     rm -f /tmp/pacman-local.conf
 fi
 rm -rf "/root/packages/"
@@ -115,8 +129,10 @@ if pacman -Q calamares >/dev/null 2>&1 && [[ -d "/root/calamares-aarch64" ]]; th
     cp -af "/root/calamares-aarch64/." "/etc/calamares/"
     rm -rf "/root/calamares-aarch64"
     echo " --> aarch64 settings applied to /etc/calamares"
+elif [[ -d "/root/calamares-aarch64" ]]; then
+    echo " --> WARNING: calamares package is NOT installed although aarch64 settings were staged — check the pacman -U errors above!"
 else
-    echo " --> calamares not installed or no aarch64 settings found, skipping"
+    echo " --> calamares not installed, skipping"
 fi
 
 echo "---> Enable systemd services in case needed --->"
