@@ -86,13 +86,16 @@ echo "--> content of /root/packages:"
 ls "/root/packages/" || true
 echo "end of content of /root/packages. <---"
 pacman -Sy
-if compgen -G "/root/packages/*.pkg.tar.zst" > /dev/null; then
+shopt -s nullglob
+local_pkg_files=(/root/packages/*.pkg.tar.zst /root/packages/*.pkg.tar.xz)
+shopt -u nullglob
+if (( ${#local_pkg_files[@]} > 0 )); then
     cp /etc/pacman.conf /tmp/pacman-local.conf
     sed -i 's/^LocalFileSigLevel.*/LocalFileSigLevel = Never/' /tmp/pacman-local.conf
     if ! grep -q '^LocalFileSigLevel' /tmp/pacman-local.conf; then
         printf '\nLocalFileSigLevel = Never\n' >> /tmp/pacman-local.conf
     fi
-    pacman -U --config /tmp/pacman-local.conf --noconfirm --needed -- "/root/packages/"*.pkg.tar.zst || true
+    pacman -U --config /tmp/pacman-local.conf --noconfirm --needed -- "${local_pkg_files[@]}" || true
     rm -f /tmp/pacman-local.conf
 fi
 rm -rf "/root/packages/"

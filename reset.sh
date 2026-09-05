@@ -3,6 +3,7 @@
 rm -rf "work" "out"
 rm -f airootfs/root/packages/*.pkg.tar.zst
 rm -f airootfs/root/packages/*.pkg.tar.zst.sig
+rm -f airootfs/root/packages/*.pkg.tar.xz
 rm -rf airootfs/root/endeavouros-skel-liveuser/pkg
 rm -f airootfs/root/endeavouros-wallpaper.png
 rm -f airootfs/root/endeavouros-skel-liveuser/*.pkg.tar.zst

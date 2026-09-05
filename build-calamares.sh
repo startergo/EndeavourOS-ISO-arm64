@@ -15,7 +15,7 @@ if [[ "${SKIP_CALAMARES:-0}" = "1" ]]; then
     exit 0
 fi
 
-if ls "${pkg_dir}"/calamares-*.pkg.tar.zst >/dev/null 2>&1 && [[ "${FORCE:-0}" != "1" ]]; then
+if ls "${pkg_dir}"/calamares-*.pkg.tar.zst "${pkg_dir}"/calamares-*.pkg.tar.xz >/dev/null 2>&1 && [[ "${FORCE:-0}" != "1" ]]; then
     echo "build-calamares: package already staged -> skipping (use FORCE=1 to rebuild)"
     exit 0
 fi
@@ -44,16 +44,17 @@ if [[ "$(id -u)" = "0" ]]; then
     # makepkg refuses to run as root; drop to a build user (same as prepare.sh)
     useradd -M -s /bin/bash builduser 2>/dev/null || true
     chown -R builduser "${build_dir}"
-    # a writable HOME keeps makepkg happy
+    # a writable HOME keeps makepkg happy; force zst (ALARM makepkg defaults to xz)
     install -d -m 700 -o builduser /tmp/calamares-home
-    su -c "cd '${build_dir}' && HOME=/tmp/calamares-home makepkg -f --noconfirm" builduser
+    su -c "cd '${build_dir}' && HOME=/tmp/calamares-home PKGEXT='.pkg.tar.zst' makepkg -f --noconfirm" builduser
     chown -R root "${build_dir}"
 else
-    (cd "${build_dir}" && makepkg -f --noconfirm)
+    (cd "${build_dir}" && HOME=/tmp/calamares-home PKGEXT='.pkg.tar.zst' makepkg -f --noconfirm)
 fi
 
 echo "build-calamares: staging package into ${pkg_dir} ..."
 install -d -m 755 "${pkg_dir}"
-cp "${build_dir}"/calamares-*.pkg.tar.zst "${pkg_dir}/"
-ls -lh "${pkg_dir}"/calamares-*.pkg.tar.zst
+# accept both extensions in case PKGEXT is not honored
+cp "${build_dir}"/calamares-*.pkg.tar.zst "${build_dir}"/calamares-*.pkg.tar.xz "${pkg_dir}/" 2>/dev/null || true
+ls -lh "${pkg_dir}"/calamares-*.pkg.tar.* | grep -v '\.sig$' || { echo "build-calamares: no package produced" >&2; exit 1; }
 echo "build-calamares: done."
