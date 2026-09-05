@@ -2,6 +2,13 @@
 
 
 ---
+# aarch64 port changes (2026-09)
+* Calamares installer now built for aarch64 in CI (from endeavouros-team/calamares 26.03.2.3) and installed on the live ISO with ARM-adapted settings: systemd-boot (or grub) bootloader, mkinitcpio target initramfs, unpackfs from arch/aarch64, no hwinfo/hardwaredetect. Skip with SKIP_CALAMARES=1.
+* Live session boots like upstream EOS again: multi-user.target + tty1 autologin -> startx -> Plasma X11 (SDDM no longer enabled on the live session).
+* Added aarch64-available packages that were missing: xterm, vulkan-swrast, vulkan-virtio, eos-rankmirrors.
+* Removed dangling VirtualBox/VMware service symlinks from airootfs.
+* Synced liveuser skel branding (previews, wallpaper screenshot) with upstream.
+
 # Ganymede Release Changes (2025)
 * adding nvidia.service and script to install Nvidia Modules packages open or closed source related to Model ranges.
 * Broadcom-WL handling is now using a service too, and it will popup request to change driver on the livesession asking user to proceed.

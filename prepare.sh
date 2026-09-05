@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+# Build EndeavourOS Calamares for aarch64 (stages it into airootfs/root/packages).
+# Skip with SKIP_CALAMARES=1.
+bash "$(dirname "$(readlink -f "$0")")/build-calamares.sh" || {
+    echo "ERROR: build-calamares.sh failed — aborting prepare" >&2
+    exit 1
+}
+
 # add date to wallpaper
 cp airootfs/root/livewall.png airootfs/root/livewall-original.png
 

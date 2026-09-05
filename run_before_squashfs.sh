@@ -97,6 +97,15 @@ if compgen -G "/root/packages/*.pkg.tar.zst" > /dev/null; then
 fi
 rm -rf "/root/packages/"
 
+echo "---> Apply aarch64 calamares settings --->"
+if pacman -Q calamares >/dev/null 2>&1 && [[ -d "/root/calamares-aarch64" ]]; then
+    cp -af "/root/calamares-aarch64/." "/etc/calamares/"
+    rm -rf "/root/calamares-aarch64"
+    echo " --> aarch64 settings applied to /etc/calamares"
+else
+    echo " --> calamares not installed or no aarch64 settings found, skipping"
+fi
+
 echo "---> Enable systemd services in case needed --->"
 echo " --> per default now in airootfs/etc/systemd/system/multi-user.target.wants"
 #systemctl enable NetworkManager.service systemd-timesyncd.service bluetooth.service firewalld.service

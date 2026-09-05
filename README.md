@@ -53,10 +53,15 @@ sudo rm -f /tmp/bootstrap-pacman.conf
 git clone https://github.com/startergo/EndeavourOS-ISO-arm64
 cd EndeavourOS-ISO-arm64
 
-bash prepare.sh         # download wallpapers, rank mirrors, build skel
+bash prepare.sh         # build Calamares (aarch64), download wallpapers, build skel
 bash reset.sh           # clean cached work/out when retrying after config changes
 sudo bash mkarchiso -v "."   # build ISO → out/
 ```
+
+`prepare.sh` also builds the EndeavourOS Calamares installer for aarch64
+(`build-calamares.sh`, adapted PKGBUILD in `calamares-aarch64/`) and stages it
+into the ISO — this adds roughly 15–25 minutes to the build. Skip it with
+`SKIP_CALAMARES=1 bash prepare.sh` when iterating on unrelated parts.
 
 ### Boot in UTM
 

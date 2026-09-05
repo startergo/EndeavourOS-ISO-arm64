@@ -1,0 +1,62 @@
+# EndeavourOS Calamares adapted for aarch64 / Arch Linux ARM.
+# Based on endeavouros-team/PKGBUILDS calamares 26.03.2.3 (Titan-Neo).
+#
+# Changes vs upstream PKGBUILD:
+# - arch: aarch64 (upstream ships x86_64 binaries; settings are arch-neutral)
+# - depends: dropped hwinfo (not available on ALARM; only used by the
+#   hardwaredetect module which we remove from the install sequence) and
+#   doxygen/qt6-webengine (docs-only / modules we skip, saves ISO size)
+# - SKIP_MODULES: kept initcpio (ARM target uses mkinitcpio, not dracut)
+
+pkgname=calamares
+pkgver=26.03.2.3
+pkgrel=2
+release_name="Titan-Neo"
+pkgdesc="Calamares installer for EndeavourOS (aarch64)"
+arch=('aarch64')
+url="https://github.com/endeavouros-team/calamares"
+license=('GPL3')
+makedepends=('git' 'cmake' 'extra-cmake-modules' 'python-jsonschema' 'python-pyaml' 'python-unidecode' 'gawk')
+conflicts=('calamares-git')
+depends=('qt6-svg' 'yaml-cpp' 'networkmanager' 'upower' 'kcoreaddons' 'kconfig' 'ki18n' 'kservice' \
+'kwidgetsaddons' 'kpmcore' 'squashfs-tools' 'rsync' 'pybind11' 'cryptsetup' \
+'dmidecode' 'gptfdisk' 'kparts' 'polkit-qt6' 'python' 'solid' 'qt6-tools' 'libpwquality' 'ckbcomp' 'qt6-declarative')
+provides=("calamares")
+options=(!strip !emptydirs)
+source=("https://github.com/endeavouros-team/${pkgname}/archive/refs/tags/${pkgver}.tar.gz")
+
+sha256sums=('fcf6b52c82f6f55f81b9586e6888db481d4a40e1814cef9727e5b699510dbc27')
+
+prepare() {
+    # Update branding.desc with the proper values
+    replace_command='
+    {
+        gsub(/\${version}/,version);
+        gsub(/\${release_name}/,release);
+        print
+    }
+    '
+    awk -i inplace -v version="${pkgver}" -v release="${release_name}" "$replace_command" "${srcdir}/calamares-${pkgver}/data/eos/branding/endeavouros/branding.desc"
+}
+
+build() {
+    cmake -B build -S "${srcdir}/calamares-${pkgver}" \
+    -DWITH_QT6=ON \
+    -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_INSTALL_LIBDIR=/usr/lib \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DINSTALL_CONFIG=OFF \
+    -DSKIP_MODULES="dracut \
+    dummycpp dummyprocess dummypython dummypythonqt \
+    finishedq keyboardq license localeq notesqml oemid \
+    openrcdmcryptcfg plymouthcfg plasmalnf services-openrc \
+    summaryq tracking webview welcomeq"
+    export DESTDIR="$srcdir/build"
+    make -C build
+}
+
+package() {
+    make -C build DESTDIR="${pkgdir}" install
+    install -dm 755 "${pkgdir}/etc"
+    cp -rp "${srcdir}/calamares-${pkgver}/data/eos" "${pkgdir}/etc/calamares"
+}
