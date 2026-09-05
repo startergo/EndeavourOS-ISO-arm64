@@ -60,6 +60,8 @@ efitools
 ## X system
 mesa
 mesa-utils
+vulkan-swrast
+vulkan-virtio
 xf86-input-libinput
 xorg-server
 xf86-video-fbdev
@@ -68,6 +70,7 @@ xorg-xinit
 xorg-xinput
 xorg-xkill
 xorg-xrandr
+xterm
 # xf86-video-amdgpu / xf86-video-ati removed (x86 GPU drivers)
 # nvidia-utils / nvidia-inst removed (x86 NVIDIA — QEMU uses virtio-gpu)
 
@@ -268,6 +271,7 @@ eos-hooks
 eos-log-tool
 # eos-packagelist removed — not yet in EOS ARM repo
 eos-quickstart
+eos-rankmirrors
 rate-mirrors
 # reflector-simple removed — depends on reflector which is unavailable on ALARM
 welcome

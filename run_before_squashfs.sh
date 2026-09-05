@@ -100,12 +100,10 @@ rm -rf "/root/packages/"
 echo "---> Enable systemd services in case needed --->"
 echo " --> per default now in airootfs/etc/systemd/system/multi-user.target.wants"
 #systemctl enable NetworkManager.service systemd-timesyncd.service bluetooth.service firewalld.service
-if pacman -Q sddm >/dev/null 2>&1; then
-    systemctl enable sddm.service
-    systemctl set-default graphical.target
-else
-    systemctl set-default multi-user.target
-fi
+# Live session boots like upstream EOS: multi-user.target + tty1 autologin (liveuser)
+# -> .bash_profile runs startx -> .xinitrc starts Plasma X11. SDDM stays installed
+# for the installed system but is not used in the live session.
+systemctl set-default multi-user.target
 
 echo "---> Set wallpaper for live-session and original for installed system --->"
 mkdir -p "/etc/calamares/files"
