@@ -86,16 +86,26 @@ echo "--> content of /root/packages:"
 ls "/root/packages/" || true
 echo "end of content of /root/packages. <---"
 pacman -Sy
-shopt -s nullglob
-local_pkg_files=(/root/packages/*.pkg.tar.zst /root/packages/*.pkg.tar.xz)
-shopt -u nullglob
-if (( ${#local_pkg_files[@]} > 0 )); then
+# NOTE: this heredoc is unquoted, so every '$' below is expanded by the OUTER
+# shell before the chroot runs it. Keep these blocks free of '$' (the reason
+# the old code used compgen + bare globs instead of arrays). ALARM downloads
+# .pkg.tar.xz, locally built packages are .pkg.tar.zst — handle both.
+if compgen -G "/root/packages/*.pkg.tar.zst" > /dev/null; then
     cp /etc/pacman.conf /tmp/pacman-local.conf
     sed -i 's/^LocalFileSigLevel.*/LocalFileSigLevel = Never/' /tmp/pacman-local.conf
     if ! grep -q '^LocalFileSigLevel' /tmp/pacman-local.conf; then
         printf '\nLocalFileSigLevel = Never\n' >> /tmp/pacman-local.conf
     fi
-    pacman -U --config /tmp/pacman-local.conf --noconfirm --needed -- "${local_pkg_files[@]}" || true
+    pacman -U --config /tmp/pacman-local.conf --noconfirm --needed -- /root/packages/*.pkg.tar.zst || true
+    rm -f /tmp/pacman-local.conf
+fi
+if compgen -G "/root/packages/*.pkg.tar.xz" > /dev/null; then
+    cp /etc/pacman.conf /tmp/pacman-local.conf
+    sed -i 's/^LocalFileSigLevel.*/LocalFileSigLevel = Never/' /tmp/pacman-local.conf
+    if ! grep -q '^LocalFileSigLevel' /tmp/pacman-local.conf; then
+        printf '\nLocalFileSigLevel = Never\n' >> /tmp/pacman-local.conf
+    fi
+    pacman -U --config /tmp/pacman-local.conf --noconfirm --needed -- /root/packages/*.pkg.tar.xz || true
     rm -f /tmp/pacman-local.conf
 fi
 rm -rf "/root/packages/"
