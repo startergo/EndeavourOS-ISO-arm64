@@ -15,9 +15,9 @@ dracut
 # edk2-shell removed — x86 UEFI firmware shell; UTM/QEMU provides UEFI for aarch64
 inetutils
 less
-linux-aarch64
+linux-eos-arm
 linux-firmware
-linux-aarch64-headers
+linux-eos-arm-headers
 logrotate
 lsb-release
 man-db
