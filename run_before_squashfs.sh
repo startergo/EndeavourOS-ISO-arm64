@@ -46,9 +46,20 @@ mkdir -p "/root/filebackups/"
 cp -af "/etc/skel/"{".bashrc",".bash_profile"} "/root/filebackups/"
 
 echo "---> Install liveuser skel (in case of conflicts use overwrite) --->"
-if compgen -G "/root/endeavouros-skel-liveuser/*.pkg.tar.zst" > /dev/null; then
-    pacman -U --noconfirm --overwrite "/etc/skel/.bash_profile","/etc/skel/.bashrc" -- "/root/endeavouros-skel-liveuser/"*.pkg.tar.zst
+# NOTE: match any compression — ALARM makepkg emits .pkg.tar.xz, x86 emits .pkg.tar.zst.
+# A .zst-only glob here silently skipped the skel install and the live session
+# booted to a console instead of starting X (no .bash_profile -> no startx).
+if compgen -G "/root/endeavouros-skel-liveuser/"*.pkg.tar.* > /dev/null; then
+    pacman -U --noconfirm --overwrite "/etc/skel/.bash_profile","/etc/skel/.bashrc" -- "/root/endeavouros-skel-liveuser/"*.pkg.tar.*
+else
+    echo " --> FATAL: no endeavouros-skel-liveuser package in /root/endeavouros-skel-liveuser/ — live session would boot to console!" >&2
+    exit 1
 fi
+# Hard guarantee: without this the ISO ships broken (console-only live session).
+grep -q startx /etc/skel/.bash_profile || {
+    echo " --> FATAL: /etc/skel/.bash_profile has no startx hook — live session would stay in console mode!" >&2
+    exit 1
+}
 echo "---> start validate skel files --->"
 ls /etc/skel/.*
 ls /etc/skel/

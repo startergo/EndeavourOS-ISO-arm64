@@ -34,8 +34,12 @@ get_pkg() {
     # --nodeps: download only the named package, not its whole dep tree.
     # The tree used to be installed wholesale in the chroot, which caused
     # stale-version conflicts (deps resolve from the repos there instead).
-    sudo pacman -Syw --nodeps "$1" --noconfirm --cachedir "airootfs/root/packages" \
-    && sudo chown $USER:$USER "airootfs/root/packages/"*".pkg.tar"*
+    # sudo only when non-root: the docker build runs prepare.sh as root, and
+    # a missing sudo binary would silently skip the download.
+    local sudo_cmd=""
+    [ "$(id -u)" != "0" ] && sudo_cmd="sudo"
+    $sudo_cmd pacman -Syw --nodeps "$1" --noconfirm --cachedir "airootfs/root/packages" \
+    && $sudo_cmd chown $USER:$USER "airootfs/root/packages/"*".pkg.tar"*
 }
 
 get_pkg "eos-settings-plasma"
