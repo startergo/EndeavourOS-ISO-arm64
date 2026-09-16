@@ -25,8 +25,15 @@ grep -q '^LocalFileSigLevel' /tmp/pacman-local.conf || printf '\nLocalFileSigLev
 pacman -U --config /tmp/pacman-local.conf --noconfirm -- "$pkg"
 rm -f /tmp/pacman-local.conf /root/packages/linux-eos-arm-*.pkg.tar.*
 
-# The mkinitcpio hook already built /boot/initramfs-linux-eos-arm.img via the
-# archiso overlay preset; hard-verify both artifacts the ISO needs.
+# The mkinitcpio pacman hook is a silent no-op for this /boot/vmlinuz-*
+# layout on ALARM (CI log shows "Updating linux initcpios..." building
+# nothing after pacman -U), so generate the ISO initramfs explicitly —
+# same invocation mkarchiso's _ensure_boot_artifacts fallback uses.
+mkinitcpio -c /etc/mkinitcpio.conf.d/archiso.conf \
+           -k /boot/vmlinuz-linux-eos-arm \
+           -g /boot/initramfs-linux-eos-arm.img
+
+# Hard-verify both artifacts the ISO needs.
 for f in /boot/vmlinuz-linux-eos-arm /boot/initramfs-linux-eos-arm.img; do
     [[ -r "$f" ]] || { echo "FATAL: $f missing after kernel install" >&2; exit 1; }
 done
