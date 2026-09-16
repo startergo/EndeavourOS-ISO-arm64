@@ -13,7 +13,7 @@ set -e
 echo ">>> customize_airootfs: installing pinned kernel linux-eos-arm 6.18.8"
 ls -la /root/packages/ || true
 
-pkg="$(compgen -G '/root/packages/linux-eos-arm-*.pkg.tar.*')"
+pkg="$(compgen -G '/root/packages/linux-eos-arm-*.pkg.tar.*' || true)"
 if [[ -z "$pkg" ]]; then
     echo "FATAL: pinned kernel package missing from /root/packages — aborting" >&2
     exit 1
