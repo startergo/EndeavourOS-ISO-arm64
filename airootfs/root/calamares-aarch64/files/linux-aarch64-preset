@@ -1,0 +1,12 @@
+# mkinitcpio preset file for 'linux-aarch64' — target (installed) system
+# The live ISO ships an archiso-only preset; this one is copied onto the
+# installed system by shellprocess@fixes before initcpio regenerates the
+# initramfs.
+
+PRESETS=('default' 'fallback')
+
+ALL_kver='/boot/vmlinuz-linux'
+
+default_image="/boot/initramfs-linux.img"
+
+fallback_image="/boot/initramfs-linux-fallback.img"
