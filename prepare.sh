@@ -44,6 +44,18 @@ get_pkg() {
 
 get_pkg "eos-settings-plasma"
 
+# Pinned kernel: linux-eos-arm 7.2.x crashes in its EFI stub on QEMU/EDK2
+# firmware (UTM) — install the last-known-good 6.18.8 via customize_airootfs.sh
+# until eos-arm ships a fixed build. See release kernel-pin-6.18.8 for provenance.
+KERNEL_PKG="linux-eos-arm-6.18.8-1-aarch64.pkg.tar.xz"
+KERNEL_SHA256="b713d80f921687cb3340a5d3a91164b750b49cd5566190ef196252d11f4b8ae8"
+wget -q --show-progress -O "airootfs/root/packages/$KERNEL_PKG" \
+  "https://github.com/startergo/EndeavourOS-ISO-arm64/releases/download/kernel-pin-6.18.8/$KERNEL_PKG"
+echo "$KERNEL_SHA256  airootfs/root/packages/$KERNEL_PKG" | sha256sum -c - || {
+    echo "ERROR: pinned kernel checksum mismatch — aborting prepare" >&2
+    exit 1
+}
+
 # Build liveuser skel (makepkg refuses to run as root; drop to a build user)
 SKEL_DIR="$(pwd)/airootfs/root/endeavouros-skel-liveuser"
 if [ "$(id -u)" = "0" ]; then
