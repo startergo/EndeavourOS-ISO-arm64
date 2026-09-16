@@ -1,0 +1,12 @@
+# mkinitcpio preset file for 'linux-eos-arm' — target (installed) system
+# The live ISO ships an archiso-only preset; this one is copied onto the
+# installed system by shellprocess@fixes before initcpio regenerates the
+# initramfs.
+
+PRESETS=('default' 'fallback')
+
+ALL_kver='/boot/vmlinuz-linux-eos-arm'
+
+default_image="/boot/initramfs-linux-eos-arm.img"
+
+fallback_image="/boot/initramfs-linux-eos-arm-fallback.img"
