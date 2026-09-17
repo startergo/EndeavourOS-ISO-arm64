@@ -50,8 +50,13 @@ get_pkg "eos-settings-plasma"
 # kernel-pin-6.18.8). See release sdboot-pin-259.1 for provenance.
 SDBOOT_BIN="systemd-bootaa64-259.1.efi"
 SDBOOT_SHA256="91740f409dc527d925ba2b3cb887503a2961fc6208cd7419c8fca4090559e467"
-wget -q --show-progress -O "airootfs/root/packages/$SDBOOT_BIN" \
-  "https://github.com/startergo/EndeavourOS-ISO-arm64/releases/download/sdboot-pin-259.1/BOOTAA64.EFI"
+SDBOOT_URL="https://github.com/startergo/EndeavourOS-ISO-arm64/releases/download/sdboot-pin-259.1/BOOTAA64.EFI"
+# Report download failures as download failures — a swallowed wget error
+# would otherwise surface (misleadingly) as a checksum mismatch.
+if ! wget --show-progress -O "airootfs/root/packages/$SDBOOT_BIN" "$SDBOOT_URL"; then
+    echo "ERROR: failed to download pinned sd-boot binary from $SDBOOT_URL — aborting prepare" >&2
+    exit 1
+fi
 echo "$SDBOOT_SHA256  airootfs/root/packages/$SDBOOT_BIN" | sha256sum -c - || {
     echo "ERROR: pinned sd-boot checksum mismatch — aborting prepare" >&2
     exit 1
