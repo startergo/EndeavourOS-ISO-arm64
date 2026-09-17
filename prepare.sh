@@ -46,17 +46,11 @@ get_pkg "eos-settings-plasma"
 
 # Pinned systemd-boot: sd-boot >= 260 fails to launch any kernel on QEMU/EDK2
 # (UTM) — ship the last-known-good 259.1 bootloader on the ESP via
-# customize_airootfs.sh. Kernel version was ruled out (see release
-# kernel-pin-6.18.8). See release sdboot-pin-259.1 for provenance.
+# customize_airootfs.sh. Provenance and removal condition: assets/README.md.
 SDBOOT_BIN="systemd-bootaa64-259.1.efi"
 SDBOOT_SHA256="91740f409dc527d925ba2b3cb887503a2961fc6208cd7419c8fca4090559e467"
-SDBOOT_URL="https://github.com/startergo/EndeavourOS-ISO-arm64/releases/download/sdboot-pin-259.1/BOOTAA64.EFI"
-# Report download failures as download failures — a swallowed wget error
-# would otherwise surface (misleadingly) as a checksum mismatch.
-if ! wget -q --show-progress -O "airootfs/root/packages/$SDBOOT_BIN" "$SDBOOT_URL"; then
-    echo "ERROR: failed to download pinned sd-boot binary from $SDBOOT_URL — aborting prepare" >&2
-    exit 1
-fi
+mkdir -p "airootfs/root/packages"
+cp "assets/$SDBOOT_BIN" "airootfs/root/packages/$SDBOOT_BIN"
 echo "$SDBOOT_SHA256  airootfs/root/packages/$SDBOOT_BIN" | sha256sum -c - || {
     echo "ERROR: pinned sd-boot checksum mismatch — aborting prepare" >&2
     exit 1
