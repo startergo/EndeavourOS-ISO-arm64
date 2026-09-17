@@ -15,12 +15,13 @@ dracut
 # edk2-shell removed — x86 UEFI firmware shell; UTM/QEMU provides UEFI for aarch64
 inetutils
 less
-# NOTE: kernel is NOT installed from the repo — linux-eos-arm 7.2.x crashes in
-# its EFI stub on QEMU/EDK2 (UTM). prepare.sh stages a pinned 6.18.8 package
-# (release kernel-pin-6.18.8) and customize_airootfs.sh installs it after
-# pacstrap, in time for the ISO boot-file copy. Re-add linux-eos-arm here and
-# drop that pin once eos-arm ships a fixed stub.
+# NOTE: kernel comes from the repo normally. Only the ESP's systemd-boot is
+# pinned to 259.1 (sd-boot >= 260 cannot launch kernels on QEMU/EDK2/UTM) —
+# see prepare.sh + customize_airootfs.sh and release sdboot-pin-259.1.
+# Drop that pin once systemd-boot boots again on QEMU/EDK2 armvirt.
+linux-eos-arm
 linux-firmware
+linux-eos-arm-headers
 logrotate
 lsb-release
 man-db

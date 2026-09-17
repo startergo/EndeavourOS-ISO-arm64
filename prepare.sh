@@ -44,15 +44,16 @@ get_pkg() {
 
 get_pkg "eos-settings-plasma"
 
-# Pinned kernel: linux-eos-arm 7.2.x crashes in its EFI stub on QEMU/EDK2
-# firmware (UTM) — install the last-known-good 6.18.8 via customize_airootfs.sh
-# until eos-arm ships a fixed build. See release kernel-pin-6.18.8 for provenance.
-KERNEL_PKG="linux-eos-arm-6.18.8-1-aarch64.pkg.tar.xz"
-KERNEL_SHA256="b713d80f921687cb3340a5d3a91164b750b49cd5566190ef196252d11f4b8ae8"
-wget -q --show-progress -O "airootfs/root/packages/$KERNEL_PKG" \
-  "https://github.com/startergo/EndeavourOS-ISO-arm64/releases/download/kernel-pin-6.18.8/$KERNEL_PKG"
-echo "$KERNEL_SHA256  airootfs/root/packages/$KERNEL_PKG" | sha256sum -c - || {
-    echo "ERROR: pinned kernel checksum mismatch — aborting prepare" >&2
+# Pinned systemd-boot: sd-boot >= 260 fails to launch any kernel on QEMU/EDK2
+# (UTM) — ship the last-known-good 259.1 bootloader on the ESP via
+# customize_airootfs.sh. Kernel version was ruled out (see release
+# kernel-pin-6.18.8). See release sdboot-pin-259.1 for provenance.
+SDBOOT_BIN="systemd-bootaa64-259.1.efi"
+SDBOOT_SHA256="91740f409dc527d925ba2b3cb887503a2961fc6208cd7419c8fca4090559e467"
+wget -q --show-progress -O "airootfs/root/packages/$SDBOOT_BIN" \
+  "https://github.com/startergo/EndeavourOS-ISO-arm64/releases/download/sdboot-pin-259.1/BOOTAA64.EFI"
+echo "$SDBOOT_SHA256  airootfs/root/packages/$SDBOOT_BIN" | sha256sum -c - || {
+    echo "ERROR: pinned sd-boot checksum mismatch — aborting prepare" >&2
     exit 1
 }
 
