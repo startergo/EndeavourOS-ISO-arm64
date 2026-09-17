@@ -15,6 +15,10 @@ dracut
 # edk2-shell removed — x86 UEFI firmware shell; UTM/QEMU provides UEFI for aarch64
 inetutils
 less
+# NOTE: kernel comes from the repo normally. Only the ESP's systemd-boot is
+# pinned to 259.1 (sd-boot >= 260 cannot launch kernels on QEMU/EDK2/UTM) —
+# see prepare.sh + customize_airootfs.sh and release sdboot-pin-259.1.
+# Drop that pin once systemd-boot boots again on QEMU/EDK2 armvirt.
 linux-eos-arm
 linux-firmware
 linux-eos-arm-headers

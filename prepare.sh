@@ -44,6 +44,18 @@ get_pkg() {
 
 get_pkg "eos-settings-plasma"
 
+# Pinned systemd-boot: sd-boot >= 260 fails to launch any kernel on QEMU/EDK2
+# (UTM) — ship the last-known-good 259.1 bootloader on the ESP via
+# customize_airootfs.sh. Provenance and removal condition: assets/README.md.
+SDBOOT_BIN="systemd-bootaa64-259.1.efi"
+SDBOOT_SHA256="91740f409dc527d925ba2b3cb887503a2961fc6208cd7419c8fca4090559e467"
+mkdir -p "airootfs/root/packages"
+cp "assets/$SDBOOT_BIN" "airootfs/root/packages/$SDBOOT_BIN"
+echo "$SDBOOT_SHA256  airootfs/root/packages/$SDBOOT_BIN" | sha256sum -c - || {
+    echo "ERROR: pinned sd-boot checksum mismatch — aborting prepare" >&2
+    exit 1
+}
+
 # Build liveuser skel (makepkg refuses to run as root; drop to a build user)
 SKEL_DIR="$(pwd)/airootfs/root/endeavouros-skel-liveuser"
 if [ "$(id -u)" = "0" ]; then
