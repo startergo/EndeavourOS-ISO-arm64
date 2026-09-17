@@ -9,7 +9,7 @@
 # Synchronous Exception. 259.1 is the last known-good bootloader (proven on the
 # 2026.02.22 ISO; kernel version was ruled out by pinning 6.18.8 into a current
 # build — still crashed). Only this EFI binary is pinned; userspace systemd
-# stays current. See releases sdboot-pin-259.1 / kernel-pin-6.18.8 for details.
+# stays current. Provenance and removal condition: assets/README.md.
 set -e
 
 echo ">>> customize_airootfs: pinning systemd-boot to 259.1"
